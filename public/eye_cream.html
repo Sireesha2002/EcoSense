@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Cream Products</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <h1>Eye Cream Products</h1>
+        <div id="cart-display">
+            <span>Cart: <span id="cart-count">0</span> items</span>
+        </div>
+    </header>
+
+    <!-- Search and Sort Section -->
+    <div id="search-sort-bar">
+        <div id="search-bar">
+            <input type="text" id="search-input" placeholder="Search products..." oninput="filterProducts()">
+        </div>
+        <div id="sort-bar">
+            <select id="sort-options" onchange="sortProducts()">
+                <option value="default">Sort By</option>
+                <option value="price-low-high">Price: Low to High</option>
+                <option value="price-high-low">Price: High to Low</option>
+                <option value="name-az">Name: A to Z</option>
+                <option value="name-za">Name: Z to A</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <main>
+        <section id="product-list">
+            <!-- Products will be dynamically loaded here -->
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" onclick="scrollToTop()">↑</button>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>© 2024 EcoSense Skincare. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        const category = "Eye Cream"; // Define category name for this page
+
+        // Cart Management
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function addToCart(productName, price) {
+            const existingProduct = cart.find(item => item.productName === productName);
+
+            if (existingProduct) {
+                existingProduct.quantity++;
+            } else {
+                cart.push({
+                    productName,
+                    price,
+                    quantity: 1
+                });
+            }
+
+            // Save to local storage
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            alert(`${productName} added to cart!`);
+            updateCartCount();
+        }
+
+        function updateCartCount() {
+            const cartCount = document.getElementById("cart-count");
+            if (cartCount) {
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                cartCount.textContent = totalItems;
+            }
+        }
+
+        // Fetch and load products dynamically
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch('products.json');
+                const products = await response.json();
+
+                const productList = document.getElementById("product-list");
+
+                // Filter products by the "Eye Cream" category
+                const filteredProducts = products.filter(
+                    product => product.category.toLowerCase() === category.toLowerCase()
+                );
+
+                // If no products are found
+                if (filteredProducts.length === 0) {
+                    productList.innerHTML = "<p>No products found for this category.</p>";
+                    return;
+                }
+
+                // Display the filtered products dynamically
+                filteredProducts.forEach(product => {
+                    const productCard = document.createElement("div");
+                    productCard.className = "product-card";
+
+                    productCard.innerHTML = `
+                        <img src="${product.image_path}" alt="${product.product_name}" class="product-image">
+                        <h3>${product.product_name}</h3>
+                        <p><strong>Brand:</strong> ${product.brand_name}</p>
+                        <p><strong>Price:</strong> $${product.price_usd.toFixed(2)}</p>
+                        <p><strong>Rating:</strong> ⭐ ${product.rating} / 5</p>
+                        <button onclick="addToCart('${product.product_name}', ${product.price_usd})">Add to Cart</button>
+                        <button class="view-details-btn" onclick="viewDetails('${product.product_id}')">View Details</button>
+                    `;
+
+                    productList.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error("Error fetching products:", error);
+                document.getElementById("product-list").innerHTML =
+                    "<p>Error loading products. Please try again later.</p>";
+            }
+
+            updateCartCount(); // Initialize cart count on page load
+        });
+
+        function viewDetails(productId) {
+            localStorage.setItem("selectedProduct", productId);
+            window.location.href = "product-detail.html";
+        }
+
+        // Scroll to Top Functionality
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    </script>
+</body>
+</html>

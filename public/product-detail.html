@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Product Details</h1>
+        <div id="cart-display">
+            <span>Cart: <span id="cart-count">0</span> items</span>
+        </div>
+        <button onclick="window.history.back()">Back to Category</button>
+    </header>
+    <main>
+        <section id="product-details">
+            <!-- Product details will be dynamically loaded here -->
+        </section>
+        <section id="lifecycle-details">
+            <h2>Lifecycle Stages</h2>
+            <table id="lifecycle-table">
+                <thead>
+                    <tr>
+                        <th>Stage</th>
+                        <th>Carbon Footprint (kg CO2)</th>
+                        <th>Energy Usage (kWh)</th>
+                        <th>Water Consumption (L)</th>
+                        <th>Recyclable Material (%)</th>
+                        <th>Eco Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Lifecycle stage details will be dynamically loaded here -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 EcoSense Skincare. All rights reserved.</p>
+    </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const selectedProductId = localStorage.getItem("selectedProduct");
+
+            try {
+                // Fetch data from both datasets
+                const [mainResponse, lifecycleResponse] = await Promise.all([
+                    fetch('products.json'),
+                    fetch('synthetic_lifecycle_data.json')
+                ]);
+
+                const mainData = await mainResponse.json();
+                const lifecycleData = await lifecycleResponse.json();
+
+                // Get product details from the main dataset
+                const product = mainData.find(p => p.product_id === selectedProductId);
+
+                // Get lifecycle data for the selected product
+                const lifecycleStages = lifecycleData.filter(l => l.product_id === selectedProductId);
+                const usageStage = lifecycleStages.find(l => l.stage.toLowerCase() === "usage");
+
+                if (product && lifecycleStages.length > 0) {
+                    // Display product details
+                    const detailsDiv = document.getElementById("product-details");
+                    detailsDiv.innerHTML = `
+                        <img src="${product.image_path}" alt="${product.product_name}" class="product-image">
+                        <h2>${product.product_name}</h2>
+                        <p><strong>Brand:</strong> ${product.brand_name}</p>
+                        <p><strong>Price:</strong> $${product.price_usd.toFixed(2)}</p>
+                        <p><strong>Size:</strong> ${product.size_ml} ml</p>
+                        <p><strong>Rating:</strong> ⭐ ${product.rating} / 5</p>
+                        <p><strong>Main Ingredient:</strong> ${product.main_ingredient}</p>
+                        <p><strong>Packaging:</strong> ${product.packaging_type}</p>
+                        <p><strong>pH Level:</strong> ${product.pH_level}</p>
+                        <p><strong>Overall Eco Score:</strong> ${usageStage.eco_score}</p>
+                        <p><strong>Biodegradable:</strong> ${usageStage.biodegradable ? "Yes" : "No"}</p>
+                    `;
+
+                    // Populate the lifecycle stages table
+                    const lifecycleTableBody = document.querySelector("#lifecycle-table tbody");
+                    lifecycleStages.forEach(stage => {
+                        const row = document.createElement("tr");
+
+                        row.innerHTML = `
+                            <td>${stage.stage}</td>
+                            <td>${stage.carbon_footprint}</td>
+                            <td>${stage.energy_usage}</td>
+                            <td>${stage.water_consumption}</td>
+                            <td>${(stage.recyclable_material * 100).toFixed(2)}%</td>
+                            <td>${stage.eco_score}</td>
+                        `;
+
+                        lifecycleTableBody.appendChild(row);
+                    });
+                } else {
+                    document.getElementById("product-details").innerHTML = "<p>Product not found.</p>";
+                }
+            } catch (error) {
+                console.error("Error loading product details:", error);
+                document.getElementById("product-details").innerHTML =
+                    "<p>Error loading product details. Please try again later.</p>";
+            }
+
+            updateCartCount();
+        });
+
+        // Cart Management
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function addToCart(productName, price) {
+            const existingProduct = cart.find(item => item.productName === productName);
+
+            if (existingProduct) {
+                existingProduct.quantity++;
+            } else {
+                cart.push({
+                    productName,
+                    price,
+                    quantity: 1
+                });
+            }
+
+            // Save to local storage
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            alert(`${productName} added to cart!`);
+            updateCartCount();
+        }
+
+        function updateCartCount() {
+            const cartCount = document.getElementById("cart-count");
+            if (cartCount) {
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                cartCount.textContent = totalItems;
+            }
+        }
+    </script>
+</body>
+</html>

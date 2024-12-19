@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunscreen Products</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <h1>Sunscreen Products</h1>
+        <div id="cart-display">
+            <span>Cart: <span id="cart-count">0</span> items</span>
+        </div>
+    </header>
+
+    <!-- Search and Sort Section -->
+    <div id="search-sort-bar">
+        <div id="search-bar">
+            <input type="text" id="search-input" placeholder="Search products..." oninput="filterProducts()">
+        </div>
+        <div id="sort-bar">
+            <select id="sort-options" onchange="sortProducts()">
+                <option value="default">Sort By</option>
+                <option value="price-low-high">Price: Low to High</option>
+                <option value="price-high-low">Price: High to Low</option>
+                <option value="name-az">Name: A to Z</option>
+                <option value="name-za">Name: Z to A</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <main>
+        <section id="product-list">
+            <!-- Products will be dynamically loaded here -->
+        </section>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" onclick="scrollToTop()">↑</button>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>© 2024 EcoSense Skincare. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        const category = "Sunscreen"; // Define category name for this page
+    </script>
+    <script src="category-script.js"></script>
+</body>
+</html>

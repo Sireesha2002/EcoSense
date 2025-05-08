@@ -1,5 +1,4 @@
 # EcoSense
-### README: EcoSense Skincare Web Application
 
 ### Project Overview
 EcoSense Skincare is a web-based application designed to showcase and manage skincare products across various categories. The project enables users to explore products, add them to their cart, and manage their shopping experience. It also includes functionalities for user authentication and admin-level user management.
